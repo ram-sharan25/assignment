@@ -1,9 +1,9 @@
 import React from "react";
-import { BrowserRouter, Routes, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "antd/dist/antd.css";
 
 import ListView from "./components/ListView";
 import DetailView from "./components/DetailView";
-
 
 import "./App.css";
 
@@ -11,9 +11,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route exact path="/" element={<ListView />}/>
-        {/* <Route exact path="/" element={<EntryFrom />} /> */}
-
+        <Route exact path="/" element={<ListView />} />
         <Route path="/:companyId/" element={<DetailView />} />
       </Routes>
     </BrowserRouter>

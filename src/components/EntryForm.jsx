@@ -11,11 +11,12 @@ import {
 } from "antd";
 
 import "antd/dist/antd.css";
-import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteFilled } from "@ant-design/icons";
 import { useState } from "react";
 
 const EntryForm = ({ visible, onCreate, onCancel }) => {
   const [form] = Form.useForm();
+  const [addressForm] = Form.useForm();
 
   const country = [
     {
@@ -36,10 +37,12 @@ const EntryForm = ({ visible, onCreate, onCancel }) => {
     },
   ];
 
-  // const onFinish = (values) => {
-  //   console.log("Received values of form: ", values);
-  // };
-
+  const onAddressFinish = (values) => {
+    console.log("Received values of form: ", values);
+  };
+  const onNameFinish = (values) => {
+    console.log("Received values of form: ", values);
+  };
   const [autoCompleteResult, setAutoCompleteResult] = useState([]);
 
   const onWebsiteChange = (value) => {
@@ -69,8 +72,11 @@ const EntryForm = ({ visible, onCreate, onCancel }) => {
         form
           .validateFields()
           .then((values) => {
-            form.resetFields();
-            onCreate(values);
+            addressForm.validateFields().then((addressValues) => {
+              form.resetFields();
+              addressForm.resetFields();
+              onCreate(values, addressValues);
+            });
           })
           .catch((info) => {
             console.log("Validate Failed:", info);
@@ -80,7 +86,7 @@ const EntryForm = ({ visible, onCreate, onCancel }) => {
       <Form
         form={form}
         name="dynamic_form_nest_item"
-        // onFinish={onFinish}
+        onFinish={onNameFinish}
         layout="vertical"
         scrollToFirstError
       >
@@ -133,13 +139,9 @@ const EntryForm = ({ visible, onCreate, onCancel }) => {
                   required: true,
                   message: "Please input your phone number!",
                 },
-                {
-                  pattern: "[0-9]{3}-[0-9]{3}-[0-9]{4}",
-                  message: "Please match the following pattern 999-999-9999!",
-                },
               ]}
             >
-              <Input size="20" minlength="9" maxlength="14" />
+              <Input size="20" minLength="10" maxLength="14" />
             </Form.Item>
           </Col>
           <Col span={5} offset={1}>
@@ -167,102 +169,139 @@ const EntryForm = ({ visible, onCreate, onCancel }) => {
             </Form.Item>
           </Col>
         </Row>
-        <h2>Address </h2>
-        <div>
-          <Form.List name="users">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{
-                      display: "flex",
-                      marginBottom: 8,
-                    }}
-                    align="baseline"
-                  >
-                    <MinusCircleOutlined onClick={() => remove(name)} />
+      </Form>
+      <Form
+        layout="vertical"
+        form={addressForm}
+        initialValues={{ address: [""] }}
+      >
+        <Form.List name="address">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField }) => (
+                <Space
+                  key={key}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    marginBottom: 8,
+                  }}
+                  align="baseline"
+                >
+                  <Row>
+                    <h2>Address {key} </h2>
+                    <br></br>
+                    <DeleteFilled
+                      style={{
+                        margin: "9px 20px 0 20px",
+                        fontSize: "16px",
+                        color: "#e97676",
+                      }}
+                      onClick={() => remove(name)}
+                    />
                     <br />
                     <br />
-                    <Row>
-                      <Col span={5} offset={1}>
-                        <Form.Item
-                          {...restField}
-                          name="officeType"
-                          label="Office Type"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please input Office Type!",
-                            },
-                          ]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Col>
+                  </Row>
 
-                      <Col span={5} offset={1}>
-                        <Form.Item
+                  <Row>
+                    <Col span={5} offset={1}>
+                      <Form.Item
                         {...restField}
-                          name="country"
-                          label="Country"
-                          rules={[
-                            {
-                              type: "array",
-                              required: true,
-                              message: "Please select the country!",
-                            },
-                          ]}
-                        >
-                          <Cascader options={country} />
-                        </Form.Item>
-                      </Col>
-                      <Col span={5} offset={1}>
-                        <Form.Item {...restField} name="address1" label="Address 1">
-                          <Input type="text" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={5} offset={1}>
-                        <Form.Item {...restField} name="address2" label="Address2">
-                          <Input />
-                        </Form.Item>
-                      </Col>
-                      <Col span={5} offset={1}>
-                        <Form.Item {...restField} name="zipPostalCode" label="Zip/Postal Code">
-                          <Input type="number" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={5} offset={1}>
-                        <Form.Item {...restField} name="city" label="City">
-                          <Input type="text" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={5} offset={1}>
-                        <Form.Item {...restField} name="state" label="State">
-                          <Input type="text" />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Space>
-                ))}
-                <Col span={6} offset={0.8}>
-                  <Form.Item>
-                    <Button
-                      type="default"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
-                    >
-                      Add New Address
-                    </Button>
-                  </Form.Item>
-                </Col>
-              </>
-            )}
-          </Form.List>
-        </div>
+                        name={[name, "officeType"]}
+                        label="Office Type"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please input Office Type!",
+                          },
+                        ]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
 
-        {/* <Row>
+                    <Col span={5} offset={1}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "country"]}
+                        label="Country"
+                        rules={[
+                          {
+                            type: "array",
+                            required: true,
+                            message: "Please select the country!",
+                          },
+                        ]}
+                      >
+                        <Cascader options={country} />
+                      </Form.Item>
+                    </Col>
+                    <Col span={5} offset={1}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "address1"]}
+                        label="Address 1"
+                      >
+                        <Input type="text" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={5} offset={1}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "address2"]}
+                        label="Address2"
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={5} offset={1}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "zipcode"]}
+                        label="Zip/Postal Code"
+                      >
+                        <Input type="text" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={5} offset={1}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "city"]}
+                        label="City"
+                      >
+                        <Input type="text" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={5} offset={1}>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "state"]}
+                        label="State"
+                      >
+                        <Input type="text" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Space>
+              ))}
+              <Col span={6} offset={0.8}>
+                <Form.Item>
+                  <Button
+                    type="default"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add New Address
+                  </Button>
+                </Form.Item>
+              </Col>
+            </>
+          )}
+        </Form.List>
+      </Form>
+
+      {/* <Row>
           <Col span={8}>
             <Form.Item>
               <Button type="primary" htmlType="submit">
@@ -271,7 +310,6 @@ const EntryForm = ({ visible, onCreate, onCancel }) => {
             </Form.Item>
           </Col>
         </Row> */}
-      </Form>
     </Modal>
   );
 };
